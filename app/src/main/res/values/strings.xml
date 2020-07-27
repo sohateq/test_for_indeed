@@ -8,7 +8,7 @@
     <string name="text_rubble_letter">Р</string>
 
     <string name="title_activity_login">Sign in</string>
-    <string name="prompt_email">Email</string>
+    <string name="prompt_email">Login</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
@@ -33,8 +33,8 @@
     <string name="barcode_error">"Error reading barcode: %1$s"</string>
 
     <string name="biometric_title">Login</string>
-    <string name="biometric_subtitle">Login to your Osta account</string>
-    <string name="biometric_description">Place your finger on the device home button to verify your identity</string>
+    <string name="biometric_subtitle">Login to your account</string>
+    <string name="biometric_description">Place your finger on the scanner</string>
     <string name="biometric_negative_button_text">CANCEL</string>
 
 
@@ -45,4 +45,7 @@
     <string name="biometric_failure">Login not successful!</string>
     <string name="biometric_cancelled">Authentication cancelled by user</string>
     <string name="biometric_success">Login Successful</string>
+    <string name="action_sign_in_fingerprint">Fingerprint</string>
+    <string name="title_favourite">Favourite</string>
+    <string name="title_main">Main</string>
 </resources>

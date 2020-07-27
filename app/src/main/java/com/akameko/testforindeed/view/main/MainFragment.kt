@@ -19,7 +19,7 @@ import com.akameko.testforindeed.repository.pojos.Jeans
 
 class MainFragment : Fragment() {
 
-    private var mainViewModel: MainViewModel? = null
+    private lateinit var mainViewModel: MainViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -30,37 +30,36 @@ class MainFragment : Fragment() {
     }
 
     private fun initFragment() {
-        mainViewModel!!.loadJeans()
-        mainViewModel!!.jeansList.observe(viewLifecycleOwner, Observer {
+        mainViewModel.loadJeans()
+        mainViewModel.jeansList.observe(viewLifecycleOwner, Observer {
             jeansList: List<Jeans?> -> initRecycler(jeansList)
         })
     }
 
-    fun initRecycler(jeansList: List<Jeans?>) {
+    private fun initRecycler(jeansList: List<Jeans?>) {
         val recyclerView: RecyclerView = activity!!.findViewById(R.id.main_recycler_view)
-        recyclerView.itemAnimator = DefaultItemAnimator()
-        recyclerView.setHasFixedSize(true)
-        val layoutManager = GridLayoutManager(context, 2)
-        recyclerView.layoutManager = layoutManager
-        val liked = mainViewModel!!.jeansDatabase.jeansDao.allItems
+        recyclerView.apply{
+            itemAnimator = DefaultItemAnimator()
+            setHasFixedSize(true)
+            val layoutManager = GridLayoutManager(context, 2)
+            this.layoutManager = layoutManager
+        }
+
+        val liked = mainViewModel.jeansDatabase.jeansDao.allItems
         val mainAdapter = MainAdapter(jeansList, liked)
-        mainAdapter.setOnLikeClickListener { likedJeans: Jeans?, position: Int, addToFavourite: Boolean ->
+        mainAdapter.setOnLikeClickListener { likedJeans: Jeans?, _: Int, addToFavourite: Boolean ->
             if (addToFavourite) {
-                mainViewModel!!.jeansDatabase.jeansDao.insert(likedJeans)
+                mainViewModel.addToFavourite(likedJeans)
                 Log.d("123", "Добавлено в избранное")
                 showLikeNotification()
-                //Log.d("123", jeansDatabase.getJeansDao().getItemById(likedJeans.getId()).toString());
             } else {
-                mainViewModel!!.jeansDatabase.jeansDao.delete(likedJeans)
+                mainViewModel.removeFromFavourite(likedJeans)
                 Log.d("123", "Убрано из избранного")
             }
         }
-//        mainAdapter.setOnItemClickListener { jeansToShow: Jeans?, position: Int ->
-//            sharedViewModel!!.activeJeans = jeansToShow
-//
-//            //(activity as MainActivity?)!!.showDetails()
-//        }
+
         recyclerView.adapter = mainAdapter
+
         val textViewCounter = activity!!.findViewById<TextView>(R.id.text_view_main_count)
         textViewCounter.text = String.format(getString(R.string.text_counter), jeansList.size)
     }

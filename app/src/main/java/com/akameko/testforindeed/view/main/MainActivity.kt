@@ -1,39 +1,58 @@
 package com.akameko.testforindeed.view.main
 
-import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentTransaction
 import com.akameko.testforindeed.R
-import com.akameko.testforindeed.view.login.LoginActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
+
+    private lateinit var navView: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        showLoginActivity()
+
         setContentView(R.layout.activity_main)
         if (savedInstanceState == null) {
 
             supportFragmentManager.beginTransaction()
-                    .add(R.id.container, MainFragment.newInstance())
+                    .add(R.id.nav_host_fragment, MainFragment.newInstance())
+                   // .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .commitNow()
 
         }
+        initNavigation()
 
     }
-    private fun showLoginActivity(){
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivity(intent)
+
+    private fun initNavigation() {
+        navView = findViewById(R.id.nav_view)
+        navView.setOnNavigationItemSelectedListener(this)
+        navView.selectedItemId = R.id.navigation_main
     }
 
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.navigation_favourite -> {
+                supportFragmentManager.beginTransaction()
+                        .replace(R.id.nav_host_fragment, FavouriteFragment.newInstance())
+                        //.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .commitNow()
+                return true
+            }
+            R.id.navigation_main -> {
+                supportFragmentManager.beginTransaction()
+                        .replace(R.id.nav_host_fragment, MainFragment.newInstance())
+                       // .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .commitNow()
 
-//    fun showDetails() {
-//        val detailFragment = DetailFragment()
-//        val fm = supportFragmentManager
-//        fm.beginTransaction()
-//                .replace(R.id.container, detailFragment)
-//                .addToBackStack("")
-//                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-//                .commit()
-//    }
+
+                return true
+            }
+
+        }
+        return false
+    }
 }

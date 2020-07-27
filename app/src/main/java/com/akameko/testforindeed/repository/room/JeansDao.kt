@@ -1,5 +1,6 @@
 package com.akameko.testforindeed.repository.room
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.akameko.testforindeed.repository.pojos.Jeans
 
@@ -18,7 +19,10 @@ interface JeansDao {
     fun deleteAll()
 
     @get:Query("SELECT * FROM jeans")
-    val allItems: List<Jeans?>?
+    val allItems:  List<Jeans?>?
+
+    @get:Query("SELECT * FROM jeans")
+    val allItemsLiveData: LiveData<List<Jeans>>
 
     @Query("SELECT * FROM jeans WHERE id == :id")
     fun getItemById(id: Int?): Jeans?

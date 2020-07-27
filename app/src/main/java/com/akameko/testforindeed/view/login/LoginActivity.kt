@@ -5,16 +5,18 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.akameko.testforindeed.R
 import com.akameko.testforindeed.barcodegooglesample.BarcodeCaptureActivity
+import com.akameko.testforindeed.view.main.MainActivity
 import com.an.biometric.BiometricCallback
-import com.an.biometric.BiometricManager
 import com.an.biometric.BiometricManager.BiometricBuilder
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.vision.barcode.Barcode
@@ -22,25 +24,27 @@ import com.google.android.gms.vision.barcode.Barcode
 
 class LoginActivity : AppCompatActivity(), BiometricCallback {
 
-    var editTextLogin: EditText? = null
-    var editTextPass: EditText? = null
-    lateinit var buttonSignIn: Button
-    lateinit var buttonSignUp: Button
+    private lateinit var editTextLogin: EditText
+    private lateinit var editTextPass: EditText
 
-    lateinit var sharedPreferences: SharedPreferences
+    private lateinit var buttonSignIn: Button
+    private lateinit var buttonSignUp: Button
+    private lateinit var buttonFingerprint: Button
 
-    var mBiometricManager: BiometricManager? = null
+    private lateinit var sharedPreferences: SharedPreferences
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         initKeystore()
         initViews()
-        displayBiometricPrompt()
+
     }
 
     private fun initKeystore() {
-        //keystore
+        //keystore (EncryptedSharedPreferences)
         val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
         val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
 
@@ -57,26 +61,31 @@ class LoginActivity : AppCompatActivity(), BiometricCallback {
     private fun initViews() {
         editTextLogin = findViewById(R.id.edit_text_login)
         editTextPass = findViewById(R.id.edit_text_password)
-        buttonSignIn = findViewById(R.id.button_login)
 
-        buttonSignIn.setOnClickListener { v ->
-            var correctPass = sharedPreferences.getString(editTextLogin?.text.toString(), null).toString()
-            if (editTextPass?.text.toString() == correctPass) {
-                Toast.makeText(this, "Lucky", Toast.LENGTH_LONG).show()
+
+        buttonSignIn = findViewById(R.id.button_login)
+        buttonSignIn.setOnClickListener {
+            val correctPass = sharedPreferences.getString(editTextLogin.text.toString(), null).toString()
+            if (editTextPass.text.toString() == correctPass) {
+                //Toast.makeText(this, "Lucky", Toast.LENGTH_LONG).show()
+                launchMainActivity()
             } else {
-                Toast.makeText(this, "Unlucky", Toast.LENGTH_LONG).show()
+                //Toast.makeText(this, "Неверный пароль или логин!", Toast.LENGTH_LONG).show()
+                showStatus("Неверный пароль или логин!")
             }
         }
 
         buttonSignUp = findViewById(R.id.button_sign_up)
-        buttonSignUp.setOnClickListener { v ->
-            //launch camera
+        buttonSignUp.setOnClickListener {
             // launch barcode activity.
             val intent = Intent(this, BarcodeCaptureActivity::class.java)
             intent.putExtra(BarcodeCaptureActivity.AutoFocus, true)
-            //intent.putExtra(BarcodeCaptureActivity.UseFlash, true)
-
             startActivityForResult(intent, 0)
+        }
+
+        buttonFingerprint = findViewById(R.id.button_fingerprint)
+        buttonFingerprint.setOnClickListener {
+            displayBiometricPrompt()
         }
     }
 
@@ -86,15 +95,19 @@ class LoginActivity : AppCompatActivity(), BiometricCallback {
                 if (data != null) {
                     val barcode: Barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject)
                     signUp(barcode)
-                    Toast.makeText(this, "Sign up succesful", Toast.LENGTH_LONG).show()
+                            //Toast.makeText(this, "Sign up succesful", Toast.LENGTH_LONG).show()
+
                     Log.d("123", "Barcode read: " + barcode.displayValue)
 
                 } else {
-                    Toast.makeText(this, "Sign up fail", Toast.LENGTH_LONG).show()
+                    showStatus("Регистрация не удалась")
+                    //Toast.makeText(this, "Sign up fail", Toast.LENGTH_LONG).show()
                     Log.d("123", "No barcode captured, intent data is null")
                 }
             } else {
-                Toast.makeText(this, "Sign up fail", Toast.LENGTH_LONG).show()
+                showStatus("Регистрация не удалась")
+                        //Toast.makeText(this, "Sign up fail", Toast.LENGTH_LONG).show()
+                Log.d("123", "No barcode captured, result code is not successful")
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
@@ -102,7 +115,7 @@ class LoginActivity : AppCompatActivity(), BiometricCallback {
     }
 
     private fun signUp(barcode: Barcode) {
-        var base64 = String(Base64.decode(barcode.displayValue, Base64.DEFAULT))
+        val base64 = String(Base64.decode(barcode.displayValue, Base64.DEFAULT))
 
         var s = base64
         s = s.replace("super://secure/page?login=", "")
@@ -113,23 +126,37 @@ class LoginActivity : AppCompatActivity(), BiometricCallback {
         //сохранение в keystore (EncryptedSharedPreferences)
         val sharedPrefsEditor = sharedPreferences.edit()
         sharedPrefsEditor.putString(login, pass).apply()
+        showStatus("Sign up succesful, you can log in")
+    }
 
+    private fun launchMainActivity(){
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun showStatus(status: String){
+        val textViewStatus: TextView = findViewById(R.id.text_view_status)
+        if(textViewStatus.visibility == View.INVISIBLE){
+            textViewStatus.visibility = View.VISIBLE
+        }
+        textViewStatus.text = status
     }
 
 
     private fun displayBiometricPrompt() {
+        //var mBiometricManager: BiometricManager? = null
 
-
-        mBiometricManager = BiometricBuilder(this)
+        val mBiometricManager = BiometricBuilder(this)
                 .setTitle(getString(R.string.biometric_title))
                 .setSubtitle(getString(R.string.biometric_subtitle))
                 .setDescription(getString(R.string.biometric_description))
                 .setNegativeButtonText(getString(R.string.biometric_negative_button_text))
                 .build()
 
+
         //start authentication
-        //start authentication
-        mBiometricManager?.authenticate(this)
+        mBiometricManager.authenticate(this)
     }
 
     override fun onSdkVersionNotSupported() {
@@ -164,6 +191,7 @@ class LoginActivity : AppCompatActivity(), BiometricCallback {
     override fun onAuthenticationSuccessful() {
         //enter
         Toast.makeText(applicationContext, getString(R.string.biometric_success), Toast.LENGTH_LONG).show()
+        launchMainActivity()
     }
 
     override fun onAuthenticationHelp(helpCode: Int, helpString: CharSequence?) {

@@ -15,7 +15,8 @@ class MainViewModel : ViewModel() {
 
     var jeansList = MutableLiveData<List<Jeans>>()
 
-    var compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private var compositeDisposable: CompositeDisposable = CompositeDisposable()
+
 
     fun loadJeans() {
         val disposable = repository.jeans
