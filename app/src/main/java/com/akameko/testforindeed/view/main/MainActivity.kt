@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
             supportFragmentManager.beginTransaction()
                     .add(R.id.nav_host_fragment, MainFragment.newInstance())
-                   // .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .commitNow()
 
         }
@@ -38,14 +38,14 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             R.id.navigation_favourite -> {
                 supportFragmentManager.beginTransaction()
                         .replace(R.id.nav_host_fragment, FavouriteFragment.newInstance())
-                        //.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .commitNow()
                 return true
             }
             R.id.navigation_main -> {
                 supportFragmentManager.beginTransaction()
                         .replace(R.id.nav_host_fragment, MainFragment.newInstance())
-                       // .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                       .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .commitNow()
 
 
